@@ -1,0 +1,12 @@
+imu_transformer_node:
+  ros__parameters:
+    imu_frame: livox
+    target_frame: body
+    imu_187_trans: [ 1.0, 1.0, 1.0 ] # 初始位姿
+    imu_187_rot: [ 0.0, 0.0, 0.0, 1.0 ] # 初始四元数
+    imu_104_trans: [ 0.0, 0.0, 0.0 ] # 初始位姿
+    imu_104_rot: [ 0.0, 0.0, 0.0, 1.0 ] # 初始四元数
+    imu_in_topic1: "livox/imu_192_168_1_187"
+    imu_in_topic2: "livox/imu_192_168_1_104"
+    imu_out_topic: "livox/imu"
+    is_use_imu_104: false

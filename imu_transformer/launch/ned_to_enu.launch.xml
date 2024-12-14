@@ -12,9 +12,7 @@
   <node pkg="imu_transformer" exec="imu_transformer_node" name="imu_data_transformer" output="screen">
     <remap from="imu_in" to="imu_ned"/>
     <remap from="imu_out" to="imu_enu"/>
-    <remap from="mag_in" to="mag_ned"/>
-    <remap from="mag_out" to="mag_enu"/>
-    <param name="target_frame" value="imu_link"/>
+    <param name="target_frame" value="livox"/>
   </node>
 
 </launch>
