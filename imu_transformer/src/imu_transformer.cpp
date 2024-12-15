@@ -7,16 +7,17 @@ using std::placeholders::_1;
 namespace imu_transformer {
   ImuTransformer::ImuTransformer(const rclcpp::NodeOptions & options)
   : Node("imu_transformer", options),
-    broadcaster_(this)
+    broadcaster_(this),
+    broadcaster1_(this)
   {
     RCLCPP_INFO(get_logger(), "imu_transformer_node is created");
     this->declare_parameter("imu_frame_187", "livox_192_168_1_187");
     this->declare_parameter("imu_frame_104", "livox_192_168_1_104");
     this->declare_parameter("target_frame", "livox");
-    this->declare_parameter("imu_187_trans", std::vector<double>{-0.05, 0.05, 0.0});
-    this->declare_parameter("imu_187_rot", std::vector<double>{0.0, 0.0, 1.0, 0.0});
-    this->declare_parameter("imu_104_trans", std::vector<double>{0.05, 0.05, 0.0});
-    this->declare_parameter("imu_104_rot", std::vector<double>{0.0, 0.0, 0.0, 1.0});
+    this->declare_parameter("imu_187_trans", std::vector<double>{-0.05, -0.043, -0.025});
+    this->declare_parameter("imu_187_rot", std::vector<double>{0.0, 0.258691, 0.96596, 0.0});//{0.2588, 0.0, 0.0, 0.9659}
+    this->declare_parameter("imu_104_trans", std::vector<double>{0.05, 0.043, 0.025});
+    this->declare_parameter("imu_104_rot", std::vector<double>{-0.258819,0.0,0.0,0.965926});
     this->declare_parameter("imu_in_topic1", "livox/imu_192_168_1_187");
     this->declare_parameter("imu_in_topic2", "livox/imu_192_168_1_104");
     this->declare_parameter("imu_out_topic", "livox/imu");
@@ -57,6 +58,7 @@ namespace imu_transformer {
     // tf2_buffer_->setCreateTimerInterface(timer_interface);
 
     imu_pub_ = this->create_publisher<ImuMsg>(imu_out_topic_, 1000);
+    imu_pub1_ = this->create_publisher<ImuMsg>("imu187", 1000);
     lidar_flag_subscriber_ = this->create_subscription<std_msgs::msg::Int32>("lidar_flag", 10,
       std::bind(&ImuTransformer::lidarFlagCallback, this, _1));
 
@@ -101,7 +103,7 @@ namespace imu_transformer {
 
       imu_out->header.frame_id = target_frame_;
       imu_out->header.stamp = imu_in->header.stamp;
-      imu_pub_->publish(*imu_out);
+      imu_pub1_->publish(*imu_out);
       //RCLCPP_INFO(get_logger(),"pub imu 187");
     }
   }
@@ -140,14 +142,26 @@ namespace imu_transformer {
       transform_.child_frame_id = imu_frame_104_;
     else if(lidar_flag_ == 1)
       transform_.child_frame_id = imu_frame_187_;
-    transform_.transform.translation.x = initial_trans_[0];
-    transform_.transform.translation.y = initial_trans_[1];
-    transform_.transform.translation.z = initial_trans_[2];
-    transform_.transform.rotation.x = initial_rot_[0];
-    transform_.transform.rotation.y = initial_rot_[1];
-    transform_.transform.rotation.z = initial_rot_[2];
-    transform_.transform.rotation.w = initial_rot_[3];
+    transform_.transform.translation.x = imu_104_trans_[0];
+    transform_.transform.translation.y = imu_104_trans_[1];
+    transform_.transform.translation.z = imu_104_trans_[2];
+    transform_.transform.rotation.x = imu_104_rot_[0];
+    transform_.transform.rotation.y = imu_104_rot_[1];
+    transform_.transform.rotation.z = imu_104_rot_[2];
+    transform_.transform.rotation.w = imu_104_rot_[3];
     broadcaster_.sendTransform(transform_);
+
+    // transform_stamped_187_.header.stamp = now();
+    // transform_stamped_187_.header.frame_id = target_frame_;
+    // transform_stamped_187_.child_frame_id = imu_frame_187_;
+    // transform_stamped_187_.transform.translation.x = imu_187_trans_[0];
+    // transform_stamped_187_.transform.translation.y = imu_187_trans_[1];
+    // transform_stamped_187_.transform.translation.z = imu_187_trans_[2];
+    // transform_stamped_187_.transform.rotation.x = imu_187_rot_[0];
+    // transform_stamped_187_.transform.rotation.y = imu_187_rot_[1];
+    // transform_stamped_187_.transform.rotation.z = imu_187_rot_[2];
+    // transform_stamped_187_.transform.rotation.w = imu_187_rot_[3];
+    // broadcaster1_.sendTransform(transform_stamped_187_);
      //RCLCPP_INFO(get_logger(), "translation: [ %f, %f, %f], rotation: [ %f, %f, %f, %f]", initial_trans_[0],
      // initial_trans_[1], initial_trans_[2], initial_rot_[0], initial_rot_[1], initial_rot_[2], initial_rot_[3]);
     transform_mtx_.unlock();

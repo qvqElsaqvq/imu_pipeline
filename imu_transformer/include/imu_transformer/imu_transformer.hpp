@@ -45,6 +45,7 @@ namespace imu_transformer
     geometry_msgs::msg::TransformStamped transform_;
     std::mutex transform_mtx_;
     tf2_ros::TransformBroadcaster broadcaster_;
+    tf2_ros::TransformBroadcaster broadcaster1_;
 
     rclcpp::TimerBase::SharedPtr timer_;
     std::string imu_frame_187_;
@@ -65,6 +66,7 @@ namespace imu_transformer
     rclcpp::Subscription<ImuMsg>::SharedPtr imu_sub1_;
     rclcpp::Subscription<ImuMsg>::SharedPtr imu_sub2_;
     rclcpp::Publisher<ImuMsg>::SharedPtr imu_pub_;
+    rclcpp::Publisher<ImuMsg>::SharedPtr imu_pub1_;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr lidar_flag_subscriber_;
 
     void imuCallback1(const ImuMsg::SharedPtr imu_in);
